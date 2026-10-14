@@ -44,7 +44,7 @@
 		'zh-hk': '香港繁體',
 	};
 	const defaultChecked = {
-		'zh': true,
+		'zh': false,
 		'zh-hans': true,
 		'zh-hant': true,
 		'zh-hk': false,
@@ -216,6 +216,19 @@
 		}
 
 		const api = new mw.Api({ userAgent: 'Gadget-TranslateVariants' });
+		const currentTitle = mw.config.get( 'wgPageName' );
+		const isZhSubpage = currentTitle.endsWith( '/zh' );
+		if ( isZhSubpage ) {
+			const basename = currentTitle.replace( /\/zh$/, '' );
+			const data = await api.get( {
+				action: 'query',
+				titles: [ basename ],
+				formatversion: '2'
+			} );
+			const page = data.query.pages[0];
+			defaultChecked.zh = !page.missing;
+		}
+
 		let canDelete;
 		try {
 			const userInfo = await api.getUserInfo();
