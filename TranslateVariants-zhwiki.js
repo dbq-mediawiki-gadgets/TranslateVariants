@@ -38,7 +38,7 @@
 
 	const langs = ['zh', 'zh-hans', 'zh-hant', 'zh-hk'];
 	const langname = {
-		'zh': '原始',
+		'zh': conv( { hans: '主页面', hant: '主頁面' } ),
 		'zh-hans': '简体',
 		'zh-hant': '繁體',
 		'zh-hk': '香港繁體',
