@@ -37,13 +37,13 @@
 
 	const langs = ['zh', 'zh-hans', 'zh-hant', 'zh-hk'];
 	const langname = {
-		'zh': '原始',
+		'zh': conv( { hans: '主页面', hant: '主頁面' } ),
 		'zh-hans': '简体',
 		'zh-hant': '繁體',
 		'zh-hk': '香港繁體',
 	};
 	const defaultChecked = {
-		'zh': true,
+		'zh': false,
 		'zh-hans': true,
 		'zh-hant': true,
 		'zh-hk': false,
@@ -98,8 +98,8 @@
 			);
 			$( '<div>' )
 				.text( conv( {
-					hans: '自MediaWiki 1.41起，修改系统消息最多只需分别维护主页面及简体、繁体、香港繁体子页面，故本工具不再提供其他变体选项，如已存在其他变体子页面建议在更新后删除。',
-					hant: '自MediaWiki 1.41起，修改系統消息最多只需分別維護主頁面及簡體、繁體、香港繁體子頁面，故本工具不再提供其他變體選項，如已存在其他變體子頁面建議在更新後刪除。'
+					hans: '自MediaWiki 1.41起，修改系统消息最多只需分别维护简体、繁体、香港繁体子页面，故本工具不再提供其他变体选项，如已存在其他变体子页面建议在更新后删除，已存在的主页面因历史原因需要保留。',
+					hant: '自MediaWiki 1.41起，修改系統消息最多只需分別維護簡體、繁體、香港繁體子頁面，故本工具不再提供其他變體選項，如已存在其他變體子頁面建議在更新後刪除，已存在的主頁面因歷史原因需要保留。'
 				} ) )
 				.css( { marginTop: '0.5em' } )
 				.appendTo( notice );
@@ -215,6 +215,19 @@
 		}
 
 		const api = new mw.Api({ userAgent: 'Gadget-TranslateVariants' });
+		const currentTitle = mw.config.get( 'wgPageName' );
+		const isZhSubpage = currentTitle.endsWith( '/zh' );
+		if ( isZhSubpage ) {
+			const basename = currentTitle.replace( /\/zh$/, '' );
+			const data = await api.get( {
+				action: 'query',
+				titles: [ basename ],
+				formatversion: '2'
+			} );
+			const page = data.query.pages[0];
+			defaultChecked.zh = !page.missing;
+		}
+
 		let canDelete;
 		const userInfo = await api.getUserInfo().then(
 			( userInfo ) => userInfo,
