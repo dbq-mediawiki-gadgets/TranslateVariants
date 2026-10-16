@@ -1,7 +1,7 @@
 // <nowiki>
 /* globals TranslateVariants:true */
 /**
- * 使用說明請見 https://zh.wikipedia.org/wiki/User:Xiplus/js/TranslateVariants
+ * 使用說明請見 https://zh.wikipedia.org/wiki/Wikipedia:TranslateVariants
  */
 ( async () => {
 	const require = await mw.loader.using(['ext.gadget.HanAssist', 'mediawiki.api', 'mediawiki.util', 'oojs-ui-core', 'oojs-ui-windows', 'mediawiki.diff.styles']);

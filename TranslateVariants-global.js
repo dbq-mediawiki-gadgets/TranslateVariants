@@ -1,7 +1,7 @@
 // <nowiki>
 /* globals TranslateVariants:true */
 /**
- * 使用說明請見 https://zh.wikipedia.org/wiki/User:Xiplus/js/TranslateVariants
+ * 使用說明請見 https://zh.wikipedia.org/wiki/Wikipedia:TranslateVariants
  */
 function implWrapper( ...args ) {
 	if ( typeof mw.loader.impl === 'function' ) {
