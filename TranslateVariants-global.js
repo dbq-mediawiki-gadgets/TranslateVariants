@@ -3,52 +3,37 @@
 /**
  * 使用說明請見 https://zh.wikipedia.org/wiki/Wikipedia:TranslateVariants
  */
-function implWrapper( ...args ) {
-	if ( typeof mw.loader.impl === 'function' ) {
-		return mw.loader.impl( function () {
-			return args;
-		} );
-	}
-
-	return mw.loader.implement.apply( mw.loader, args );
-}
 async function loadHanAssist() {
-	const moduleName = 'userscript.TranslateVariants.HanAssist';
-
-	if ( mw.loader.getState( 'ext.gadget.HanAssist' ) ) {
-		mw.loader.register( moduleName, null, [ 'ext.gadget.HanAssist' ] );
-
-		await mw.loader.using( 'ext.gadget.HanAssist' );
-
-		implWrapper(
-			moduleName + '@',
-			{
-				main: 'index.js',
-				files: {
-					'index.js': ( require, module ) => {
-						module.exports = require( 'ext.gadget.HanAssist' );
-					}
-				}
-			}
-		);
-
-		if ( mw.loader.getState( moduleName ) === 'missing' ) {
-			mw.loader.state( { [ moduleName ]: 'loaded' } );
-		}
-	} else {
-		mw.loader.register( moduleName, null, [] );
-
-		implWrapper(
-			moduleName + '@',
-			[ 'https://meta.wikimedia.org/w/index.php?title=User:SunAfterRain/js/HanAssist.js&action=raw&ctype=text/javascript' ]
-		);
-
-		await mw.loader.using( moduleName );
+	const moduleName = 'ext.gadget.HanAssist';
+	if (mw.loader.getState(moduleName)) {
+		const require = await mw.loader.using(moduleName);
+		return require(moduleName);
 	}
 
-	const require = await mw.loader.using( moduleName );
+	const apiUrl = new URL('https://meta.wikimedia.org/w/api.php');
+	apiUrl.search = new URLSearchParams({
+		action: 'query',
+		prop: 'revisions',
+		titles: 'User:SunAfterRain/js/HanAssist.js',
+		rvprop: 'content',
+		rvslots: 'main',
+		format: 'json',
+		formatversion: '2',
+		origin: '*'
+	}).toString();
 
-	return require( moduleName );
+	const response = await fetch(apiUrl);
+	const data = await response.json();
+	const page = (data.query && data.query.pages && data.query.pages[0]);
+	const code = (page && page.revisions && page.revisions[0] && page.revisions[0].slots && page.revisions[0].slots.main && page.revisions[0].slots.main.content);
+
+	const myModule = { exports: {} };
+	const runner = new Function('module', 'exports', 'define', 'window', 'self', code);
+	runner(myModule, myModule.exports, undefined, {}, {});
+
+	const result = myModule.exports;
+
+	return result;
 }
 ( async () => {
 	await mw.loader.using(['mediawiki.api', 'mediawiki.util', 'mediawiki.ForeignApi', 'oojs-ui-core', 'oojs-ui-windows', 'mediawiki.diff.styles']);
